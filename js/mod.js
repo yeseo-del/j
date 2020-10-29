@@ -1,19 +1,22 @@
 let modInfo = {
-	name: "The ??? Tree",
-	id: "mymod",
-	author: "nobody",
+	name: "The Solar System Tree",
+	id: "earth/solar-system-tree",
+	author: "earth",
 	pointsName: "points",
 	discordName: "",
 	discordLink: "",
 	changelogLink: "https://github.com/Acamaeda/The-Modding-Tree/blob/master/changelog.md",
-    offlineLimit: 1,  // In hours
-    initialStartPoints: new Decimal (10) // Used for hard resets and new players
+  offlineLimit: 24,  // In hours
+	initialStartPoints: new Decimal(0), // Used for hard resets and new players
+	miscellaneousGarbage: {
+		SolarBlessings: 0,
+	}
 }
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0",
-	name: "Literally nothing",
+	num: "0.1",
+	name: "appendix gaming",
 }
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
@@ -31,15 +34,26 @@ function canGenPoints(){
 
 // Calculate points/sec!
 function getPointGen() {
-	if(!canGenPoints())
-		return new Decimal(0)
+	if (!canGenPoints()) return new Decimal(0);
 
-	let gain = new Decimal(1)
-	return gain
+	// Base gain
+	let b = new Decimal(player.points.sqrt());
+	let c = new Decimal(1).sub(b);
+	let gain = c;
+	if (gain.lte(0.1)) gain = new Decimal(0.1);
+
+	// With other garbage
+	hasSOUpg(11) ? gain = gain.times(2) : gain = gain;
+	hasSOUpg(13) ? gain = gain.times(upgradeEffect("SO", 13)) : gain = gain;
+	hasSOUpg(15) ? gain = gain.times(upgradeEffect("SO", 15)) : gain = gain;
+
+	return gain;
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
-function addedPlayerData() { return {
+function addedPlayerData() {
+	return {
+		SolarBlessings: 0,
 }}
 
 // Display extra things at the top of the page
