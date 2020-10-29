@@ -49,10 +49,11 @@ addLayer("SO", {
             description: "Multiply Point gain based on Solar Points.",
             cost: new Decimal(4),
             effect() {
-                return player.SO.points.sqrt().plus(1);
+                ugh = player.SO.points.plus(1)
+                return ugh.sqrt().log10().plus(1)
             },
             effectDisplay() {
-                return `${format(player.SO.points.sqrt().plus(1))}x`;
+                return `${format(upgradeEffect("SO", 13))}x`;
             }
         },
         14: {
