@@ -54,6 +54,7 @@ function getPointGen() {
 function addedPlayerData() {
 	return {
 		SolarBlessings: 0,
+		DumpedMercuricPoints: new Decimal(0),
 }}
 
 // Display extra things at the top of the page
@@ -62,8 +63,9 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	if (player.SolarBlessings === 1) return true;
+//	if (player.SolarBlessings === 1) return true;
 	return false;
+
 }
 
 

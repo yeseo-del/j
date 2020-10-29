@@ -35,7 +35,7 @@ addLayer("SO", {
     ],
     layerShown() { return true },
     upgrades: {
-        rows: 1,
+        rows: 3,
         cols: 5,
         11: {
             description: "Double Point gain.",
@@ -80,8 +80,92 @@ addLayer("SO", {
             effectDisplay() {
                 return `${format(upgradeEffect("SO", 15))}x`
             }
+        },
+        21: {
+            description: "Gain a multiplier to Mercuric Points based on your Solar Points.",
+            cost: new Decimal(2048),
+            unlocked() {
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 25)
+            },
+            effect() {
+                return player.SO.points.log10().plus(1);
+            },
+            effectDisplay() {
+                return `${format(upgradeEffect("SO", 21))}x`
+            }
+        },
+        22: {
+            description: "mercuric content",
+            cost: new Decimal(69420),
+            unlocked() {
+                return hasUpgrade("ME", 11)
+            }
+        },
+        23: {
+            description: "mercuric content",
+            cost: new Decimal(69420),
+            unlocked() {
+                return hasUpgrade("ME", 11)
+            }
+        },
+        24: {
+            description: "mercuric content",
+            cost: new Decimal(69420),
+            unlocked() {
+                return hasUpgrade("ME", 11)
+            }
+        },
+        25: {
+            title: "Solar Blessing β",
+            description: "mercuric content",
+            cost: new Decimal(69420),
+            unlocked() {
+                return hasUpgrade("ME", 11)
+            },
+            onPurchase() {
+                player.SolarBlessings++;
+            },
+        },
+        31: {
+            description: "mercuric content 2",
+            cost: new Decimal(69420),
+            unlocked() {
+                return player.ME.unlocked;
+            }
+        },
+        32: {
+            description: "mercuric content 2",
+            cost: new Decimal(69420),
+            unlocked() {
+                return player.ME.unlocked && hasUpgrade("SO", 21);
+            }
+        },
+        33: {
+            description: "mercuric content 2",
+            cost: new Decimal(69420),
+            unlocked() {
+                return player.ME.unlocked && hasUpgrade("SO", 22);
+            }
+        },
+        34: {
+            description: "mercuric content 2",
+            cost: new Decimal(69420),
+            unlocked() {
+                return player.ME.unlocked && hasUpgrade("SO", 23);
+            }
+        },
+        35: {
+            title: "Solar Blessing γ",
+            description: "mercuric content 2",
+            cost: new Decimal(69420),
+            unlocked() {
+                return player.ME.unlocked && hasUpgrade("SO", 24);
+            },
+            onPurchase() {
+                player.SolarBlessings++;
+            },
         }
-    }
+    },
 });
 
 addLayer("ME", {
@@ -103,6 +187,7 @@ addLayer("ME", {
     exponent: 0.5, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
+        hasMilestone("ME", 1) ? mult = mult.times(player.DumpedMercuricPoints.log10().plus(1)) : mult = mult;
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -113,5 +198,83 @@ addLayer("ME", {
         { key: "m", description: "Reset for Mercuric Points", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
     ],
     layerShown() { return true },
+    bars: {
+        mercuricBar: {
+            display() {
+                return `${player.DumpedMercuricPoints}/1000`;
+            },
+            direction: UP,
+            width: 90,
+            height: 250,
+            progress() {
+                return player.DumpedMercuricPoints.div(1000);
+            }
+        }
+    },
+    milestones: {
+        1: {
+            requirementDescription: `Requires 5 Dumped Mercuric Points`,
+            effectDescription: `Gain a multiplier to Mercuric Points based on Dumped Mercuric Points. (log10(dumped))`,
+            done() {
+                return player.DumpedMercuricPoints.gte(5);
+            }
+        },
+        2: {
+            requirementDescription: `Requires 50 Dumped Mercuric Points`,
+            effectDescription: `Unlock a new row of Solar Upgrades (γ)`,
+            done() {
+                return player.DumpedMercuricPoints.gte(50);
+            }
+        }
+    },
+    upgrades: {
+        rows: 1,
+        cols: 5,
+        11: {
+            description: "Unlock a new row of Solar Upgrades. (β)",
+            cost: new Decimal(1),
+        }
+    },
+    clickables: {
+        rows: 1,
+        cols: 1, 
+        11: {
+            display() {
+                return !player.DumpedMercuricPoints.gte(1000) ? `Dump all of your Mercuric Points (${player.ME.points}) into the container.` : `You have filled the container!`
+            },
+            canClick() {
+                if (player.ME.points.gte(1)) return true;
+                return false;
+            },
+            onClick() {
+                if (player.DumpedMercuricPoints.gte(1000)) return;
+
+                player.DumpedMercuricPoints = player.DumpedMercuricPoints.plus(player.ME.points)
+                player.ME.points = new Decimal(0)
+            }
+        }
+    },
+    tabFormat: {
+        "Mercuric Dump": {
+            content: ["main-display",
+            "prestige-button",
+            "blank",
+            "milestones",
+            "blank",
+            "clickables",
+            "blank",
+            ["bar", "mercuricBar"],
+            "blank",
+            ]
+        },
+        "Upgrades": {
+            content: ["main-display",
+            "upgrades"    
+            ]
+        }
+    },
+    doReset() {
+        player.SolarBlessings = 0;
+    }
 });
 
