@@ -246,14 +246,6 @@ addLayer("SO", {
                 player.SO.buyables[12] = player.SO.buyables[12].add(1);
             }
         },
-    },
-    doReset() {
-        if (!hasMilestone("ME", 6)) layerDataReset("SO", ["buyables"])
-        else layerDataReset("SO");
-
-        if (hasMilestone("ME", 7)) player.SO.upgrades = [11, 12];
-        if (hasMilestone("ME", 3)) player.SO.upgrades = [11, 12, 13, 14, 15];
-        if (hasMilestone("ME", 8)) player.SO.upgrades = [11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35];
     }
 });
 
@@ -480,19 +472,16 @@ addLayer("ME", {
             ]
         }
     },
-    /*doReset() {
+    doReset() {
         player.SolarBlessings = new Decimal(0);
         player.AddedBlessings = new Decimal(0);
-        if (hasMilestone("ME", 6)) {
-            layerDataReset("SO", ["buyables"])
-        } else {
-            player.SO.buyables[11] = new Decimal(0);
-            player.SO.buyables[12] = new Decimal(0); 
-        }
+
+        player.SO.buyables[11] = new Decimal(0);
+        player.SO.buyables[12] = new Decimal(0); 
 
         if (hasMilestone("ME", 7)) player.SO.upgrades = [11, 12];
         if (hasMilestone("ME", 3)) player.SO.upgrades = [11, 12, 13, 14, 15];
         if (hasMilestone("ME", 8)) player.SO.upgrades = [11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35];
-    }*/
+    }
 });
 
