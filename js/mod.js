@@ -35,17 +35,26 @@ function canGenPoints(){
 // Calculate points/sec!
 function getPointGen() {
 	if (!canGenPoints()) return new Decimal(0);
+	let gain = new Decimal(1)
+
+	hasSOUpg(23) ? gain = gain.times(upgradeEffect("SO", 23)) : gain = gain;
 
 	// Base gain
+	if (!hasUpgrade("ME", 12)) {
 	let b = new Decimal(player.points.sqrt());
 	let c = new Decimal(1).sub(b);
-	let gain = c;
+	gain = c;
 	if (gain.lte(0.1)) gain = new Decimal(0.1);
+	} else {
+	gain = new Decimal(1);
+	}
+
 
 	// With other garbage
-	hasSOUpg(11) ? gain = gain.times(2) : gain = gain;
+	hasSOUpg(11) ? gain = gain.times(upgradeEffect("SO", 11)) : gain = gain;
 	hasSOUpg(13) ? gain = gain.times(upgradeEffect("SO", 13)) : gain = gain;
 	hasSOUpg(15) ? gain = gain.times(upgradeEffect("SO", 15)) : gain = gain;
+	hasSOUpg(22) ? gain = gain.times(upgradeEffect("SO", 22)) : gain = gain;
 
 	return gain;
 }
@@ -53,8 +62,9 @@ function getPointGen() {
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() {
 	return {
-		SolarBlessings: 0,
+		SolarBlessings: new Decimal(0),
 		DumpedMercuricPoints: new Decimal(0),
+		AddedBlessings: new Decimal(0),
 }}
 
 // Display extra things at the top of the page

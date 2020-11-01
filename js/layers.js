@@ -40,17 +40,30 @@ addLayer("SO", {
         11: {
             description: "Double Point gain.",
             cost: new Decimal(1),
+            effect() {
+                if (!player.SO.buyables[12].gte(1)) return new Decimal(2);
+                return new Decimal(2).times(buyableEffect("SO", 12));
+            }
         },
         12: {
             description: "Double Solar Point gain.",
             cost: new Decimal(2),
+            effect() {
+                if (!player.SO.buyables[12].gte(1)) return new Decimal(2);
+                return new Decimal(2).times(buyableEffect("SO", 12));
+            }
         },
         13: {
             description: "Multiply Point gain based on Solar Points.",
             cost: new Decimal(4),
             effect() {
-                ugh = player.SO.points.plus(1)
-                return ugh.sqrt().log10().plus(1)
+                if (!player.SO.buyables[12].gte(1)) {
+                    ugh = player.SO.points.plus(1);
+                    return ugh.sqrt().log10().plus(1);
+                } else {
+                    ugh = player.SO.points.plus(1);
+                    return (ugh.sqrt().log10().plus(1)).times(buyableEffect("SO", 12));
+                }
             },
             effectDisplay() {
                 return `${format(upgradeEffect("SO", 13))}x`;
@@ -60,8 +73,13 @@ addLayer("SO", {
             description: "Multiply Solar Point gain based on Points",
             cost: new Decimal(8),
             effect() {
-                fourteen = ((player.points.sqrt()).sqrt()).sqrt()
-                return fourteen.sqrt()
+                if (!player.SO.buyables[12].gte(1)) {
+                    fourteen = ((player.points.sqrt()).sqrt()).sqrt()
+                    return fourteen.sqrt()
+                } else { 
+                    fourteen = ((player.points.sqrt()).sqrt()).sqrt()
+                    return (fourteen.sqrt()).times(buyableEffect("SO", 12));
+                }
             },
             effectDisplay() {
                 return `${format(fourteen)}x`
@@ -72,10 +90,11 @@ addLayer("SO", {
             description: "Multiply Point and Solar Point gain by the amount of Solar Blessings you have.",
             cost: new Decimal(16),
             onPurchase() {
-                player.SolarBlessings++;
+                player.SolarBlessings = player.SolarBlessings.add(1)
             },
             effect() {
-                return player.SolarBlessings * 5;
+                if (player.AddedBlessings.gte(1)) return (player.SolarBlessings.plus(player.AddedBlessings)).times(5);
+                return (player.SolarBlessings).times(5);
             },
             effectDisplay() {
                 return `${format(upgradeEffect("SO", 15))}x`
@@ -85,34 +104,47 @@ addLayer("SO", {
             description: "Gain a multiplier to Mercuric Points based on your Solar Points.",
             cost: new Decimal(2048),
             unlocked() {
-                return hasUpgrade("ME", 11) && hasUpgrade("SO", 25)
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 15)
             },
             effect() {
-                return player.SO.points.log10().plus(1);
+                twentyone = player.SO.points.plus(1);
+                return player.SO.points.max(1).log10().plus(1);
             },
             effectDisplay() {
                 return `${format(upgradeEffect("SO", 21))}x`
             }
         },
         22: {
-            description: "mercuric content",
-            cost: new Decimal(69420),
+            description: "Gain a multiplier to Point gain based on your amount of Solar Upgrades.",
+            cost: new Decimal(8192),
             unlocked() {
-                return hasUpgrade("ME", 11)
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 21)
+            },
+            effect() {
+                return new Decimal(Math.sqrt(player.SO.upgrades.length));
+            },
+            effectDisplay() {
+                return `${format(upgradeEffect("SO", 22))}x`
             }
         },
         23: {
-            description: "mercuric content",
-            cost: new Decimal(69420),
+            description: "Multiply <b>base</b> Point gain based on amount of Solar Buyables bought.",
+            cost: new Decimal(32768),
             unlocked() {
-                return hasUpgrade("ME", 11)
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 22)
+            },
+            effect() {
+                return new Decimal(player.SO.buyables[11].plus(player.SO.buyables[12]).sqrt())
+            },
+            effectDisplay() {
+                return `${format(upgradeEffect("SO", 23))}x`
             }
         },
         24: {
             description: "mercuric content",
             cost: new Decimal(69420),
             unlocked() {
-                return hasUpgrade("ME", 11)
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 23)
             }
         },
         25: {
@@ -120,38 +152,38 @@ addLayer("SO", {
             description: "mercuric content",
             cost: new Decimal(69420),
             unlocked() {
-                return hasUpgrade("ME", 11)
+                return hasUpgrade("ME", 11) && hasUpgrade("SO", 24)
             },
             onPurchase() {
-                player.SolarBlessings++;
+                player.SolarBlessings = player.SolarBlessings.add(1)
             },
         },
         31: {
             description: "mercuric content 2",
             cost: new Decimal(69420),
             unlocked() {
-                return player.ME.unlocked;
+                return player.ME.unlocked && hasMilestone("ME", 2) && hasUpgrade("SO", 25);
             }
         },
         32: {
             description: "mercuric content 2",
             cost: new Decimal(69420),
             unlocked() {
-                return player.ME.unlocked && hasUpgrade("SO", 21);
+                return player.ME.unlocked && hasUpgrade("SO", 31);
             }
         },
         33: {
             description: "mercuric content 2",
             cost: new Decimal(69420),
             unlocked() {
-                return player.ME.unlocked && hasUpgrade("SO", 22);
+                return player.ME.unlocked && hasUpgrade("SO", 32);
             }
         },
         34: {
             description: "mercuric content 2",
             cost: new Decimal(69420),
             unlocked() {
-                return player.ME.unlocked && hasUpgrade("SO", 23);
+                return player.ME.unlocked && hasUpgrade("SO", 33);
             }
         },
         35: {
@@ -159,13 +191,70 @@ addLayer("SO", {
             description: "mercuric content 2",
             cost: new Decimal(69420),
             unlocked() {
-                return player.ME.unlocked && hasUpgrade("SO", 24);
+                return player.ME.unlocked && hasUpgrade("SO", 34);
             },
             onPurchase() {
-                player.SolarBlessings++;
+                player.SolarBlessings = player.SolarBlessings.add(1)
             },
         }
     },
+    buyables: {
+        rows: 1,
+        cols: 2,
+        11: {
+            display() {
+                return `Add a free Solar Blessing to all Solar Blessing's effects. <br> Cost: ${this.cost()} Solar Points <br> Bought: ${player.SO.buyables[11]}`
+            },
+            cost() {
+                return new Decimal(100).max(1).pow(player.SO.buyables[11].plus(1));
+            },
+            effect() {
+                return player.SO.buyables[11];
+            },
+            unlocked() {
+                return hasSOUpg(15);
+            },
+            canAfford() {
+                if (this.cost().lte(player.SO.points)) return true;
+                return false;
+            },
+            buy() {
+                player.SO.points = player.SO.points.sub(this.cost());
+                player.AddedBlessings = player.AddedBlessings.add(1);
+                player.SO.buyables[11] = player.SO.buyables[11].add(1);
+            }
+        },
+        12: {
+            display() {
+                return `Boost all first row Solar Upgrades, excluding Solar Blessing α. <br> Cost: ${this.cost()} Solar Points <br> Bought: ${player.SO.buyables[12]}`;
+            },
+            cost() {
+                return new Decimal(1000).max(1).pow(player.SO.buyables[12].plus(1));
+            },
+            effect() {
+                return player.SO.buyables[12].times(2);
+            },
+            unlocked() {
+                return hasMilestone("ME", 5);
+            },
+            canAfford() {
+                if (this.cost().lte(player.SO.points)) return true;
+                return false;
+            },
+            buy() {
+                player.SO.points = player.SO.points.sub(this.cost());
+                player.SO.buyables[12] = player.SO.buyables[12].add(1);
+            }
+        },
+    },
+    doReset() {
+        if (!hasMilestone("ME", 6)) layerDataReset("SO", ["buyables"])
+        else layerDataReset("SO");
+
+        if (hasMilestone("ME", 7)) player.SO.upgrades = [11, 12];
+        if (hasMilestone("ME", 3)) player.SO.upgrades = [11, 12, 13, 14, 15];
+        if (hasMilestone("ME", 8)) player.SO.upgrades = [11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35];
+    }
 });
 
 addLayer("ME", {
@@ -188,6 +277,7 @@ addLayer("ME", {
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         hasMilestone("ME", 1) ? mult = mult.times(player.DumpedMercuricPoints.log10().plus(1)) : mult = mult;
+        hasUpgrade("SO", 21) ? mult = mult.times(upgradeEffect("SO", 21)) : mult = mult;
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -217,15 +307,117 @@ addLayer("ME", {
             effectDescription: `Gain a multiplier to Mercuric Points based on Dumped Mercuric Points. (log10(dumped))`,
             done() {
                 return player.DumpedMercuricPoints.gte(5);
-            }
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
         },
         2: {
             requirementDescription: `Requires 50 Dumped Mercuric Points`,
             effectDescription: `Unlock a new row of Solar Upgrades (γ)`,
             done() {
                 return player.DumpedMercuricPoints.gte(50);
-            }
-        }
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        3: {
+            requirementDescription: `Requires 500 Dumped Mercuric Points`,
+            effectDescription: `Keep the next three Solar Upgrades on Mercuric reset.`,
+            done() {
+                return player.DumpedMercuricPoints.gte(500);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        4: {
+            requirementDescription: `Requires 1000 Dumped Mercuric Points`,
+            effectDescription: `Unlock Venus. (Current Endgame)`,
+            done() {
+                return player.DumpedMercuricPoints.gte(1000);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        5: {
+            requirementDescription: `Freebie!`,
+            effectDescription: `Unlock a new Solar Buyable.`,
+            done() {
+                return hasUpgrade("ME", 13);
+            },
+            unlocked() {
+                return hasUpgrade("ME", 13);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        6: {
+            requirementDescription: `Requires 100 Mercuric Points`,
+            effectDescription: `Keep all Solar Buyables on Mercuric Reset.`,
+            done() {
+                return player.ME.points.gte(100)
+            },
+            unlocked() {
+                return hasUpgrade("ME", 13);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        7: {
+            requirementDescription: `Requires 250 Mercuric Points`,
+            effectDescription: `Keep the first two Solar Upgrades on Mercuric Reset.`,
+            done() {
+                return player.ME.points.gte(250)
+            },
+            unlocked() {
+                return hasUpgrade("ME", 13);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
+        8: {
+            requirementDescription: `Requires 750 Mercuric Points`,
+            effectDescription: `Keep all Solar Upgrades on Mercuric Reset.`,
+            done() {
+                return player.ME.points.gte(750)
+            },
+            unlocked() {
+                return hasUpgrade("ME", 13);
+            },
+            style() {
+                return {
+                    'height': '90px',
+                    'width': '360px',
+                }
+            },
+        },
     },
     upgrades: {
         rows: 1,
@@ -233,6 +425,14 @@ addLayer("ME", {
         11: {
             description: "Unlock a new row of Solar Upgrades. (β)",
             cost: new Decimal(1),
+        },
+        12: {
+            description: "Remove Point decay.",
+            cost: new Decimal(2),
+        },
+        13: {
+            description: "Unlock non-dumped Mercuric Point milestones.",
+            cost: new Decimal(4),
         }
     },
     clickables: {
@@ -259,7 +459,10 @@ addLayer("ME", {
             content: ["main-display",
             "prestige-button",
             "blank",
-            "milestones",
+            ["milestone", 1],
+            ["milestone", 2],
+            ["milestone", 3],
+            ["milestone", 4],
             "blank",
             "clickables",
             "blank",
@@ -269,12 +472,27 @@ addLayer("ME", {
         },
         "Upgrades": {
             content: ["main-display",
-            "upgrades"    
+                "upgrades",
+                ["milestone", 5],
+                ["milestone", 6],
+                ["milestone", 7],
+                ["milestone", 8],
             ]
         }
     },
-    doReset() {
-        player.SolarBlessings = 0;
-    }
+    /*doReset() {
+        player.SolarBlessings = new Decimal(0);
+        player.AddedBlessings = new Decimal(0);
+        if (hasMilestone("ME", 6)) {
+            layerDataReset("SO", ["buyables"])
+        } else {
+            player.SO.buyables[11] = new Decimal(0);
+            player.SO.buyables[12] = new Decimal(0); 
+        }
+
+        if (hasMilestone("ME", 7)) player.SO.upgrades = [11, 12];
+        if (hasMilestone("ME", 3)) player.SO.upgrades = [11, 12, 13, 14, 15];
+        if (hasMilestone("ME", 8)) player.SO.upgrades = [11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 31, 32, 33, 34, 35];
+    }*/
 });
 
