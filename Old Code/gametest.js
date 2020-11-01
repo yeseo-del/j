@@ -229,6 +229,7 @@ function doReset(layer, force=false) {
 
 	updateTemp()
 	updateTemp()
+	if (layer === "ME") player.SolarBlessings = new Decimal(0)
 }
 
 function respecBuyables(layer) {
